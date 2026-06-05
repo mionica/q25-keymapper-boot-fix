@@ -35,6 +35,9 @@ Verified on a connected Q25:
 ./gradlew assembleRelease
 ```
 
+The app checks GitHub Releases when opened. If a newer SemVer release exists,
+it shows a dialog that opens the latest release page.
+
 Release signing is read from environment variables:
 
 ```bash

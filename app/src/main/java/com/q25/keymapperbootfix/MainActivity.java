@@ -1,6 +1,9 @@
 package com.q25.keymapperbootfix;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -8,6 +11,7 @@ import android.widget.TextView;
 
 public final class MainActivity extends Activity {
     private TextView status;
+    private boolean checkedForUpdates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +58,10 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         refresh();
+        if (!checkedForUpdates) {
+            checkedForUpdates = true;
+            UpdateChecker.checkForUpdates(this, this::showUpdateDialog);
+        }
     }
 
     private void refresh() {
@@ -62,5 +70,21 @@ public final class MainActivity extends Activity {
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private void showUpdateDialog(UpdateChecker.ReleaseInfo release) {
+        if (isFinishing() || isDestroyed()) return;
+
+        new AlertDialog.Builder(this)
+                .setTitle("Update available")
+                .setMessage("Version " + release.versionName + " is available.\n\nYou are running "
+                        + BuildConfig.VERSION_NAME + ".")
+                .setPositiveButton("Open release", (dialog, which) -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(release.releaseUrl));
+                    startActivity(intent);
+                })
+                .setNegativeButton("Later", (dialog, which) ->
+                        UpdateChecker.dismissRelease(this, release.versionName))
+                .show();
     }
 }
