@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows:
+      - Test
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish APK
+    runs-on: ubuntu-latest
+    if: github.repository == 'smh786/q25-keymapper-boot-fix' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Missing KEYSTORE_BASE64 secret." >&2
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > release.jks
+
+      - name: Build signed release APK
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: 1.0.${{ github.run_number }}
+          Q25_BOOT_FIX_KEYSTORE: ${{ github.workspace }}/release.jks
+          Q25_BOOT_FIX_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          Q25_BOOT_FIX_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          Q25_BOOT_FIX_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Prepare artifact names
+        run: |
+          mkdir -p release
+          cp app/build/outputs/apk/release/app-release.apk "release/q25-keymapper-boot-fix-${GITHUB_RUN_NUMBER}.apk"
+          echo "TAG_NAME=v1.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          echo "APK_PATH=release/q25-keymapper-boot-fix-${GITHUB_RUN_NUMBER}.apk" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.TAG_NAME }}
+          files: ${{ env.APK_PATH }}
+          body: |
+            Automated release from `${{ github.sha }}`.
+
+            Install the APK, open it once, then grant:
+
+            ```bash
+            adb shell pm grant com.q25.keymapperbootfix android.permission.WRITE_SECURE_SETTINGS
+            ```

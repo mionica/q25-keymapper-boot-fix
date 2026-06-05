@@ -44,6 +44,21 @@ Q25_BOOT_FIX_KEY_ALIAS=q25-keymapper-boot-fix
 Q25_BOOT_FIX_KEY_PASSWORD=...
 ```
 
+## CI and Releases
+
+Pull requests run `.github/workflows/test.yml`:
+
+- `testDebugUnitTest`
+- `lintDebug`
+- `assembleDebug`
+
+Merges to `main` run `.github/workflows/release.yml`, which builds a signed release APK and publishes it as a GitHub Release. The release workflow needs these repository secrets:
+
+- `KEYSTORE_BASE64`
+- `KEYSTORE_PASSWORD`
+- `KEY_ALIAS`
+- `KEY_PASSWORD`
+
 ## Targeted KeyMapper Service
 
 ```text
