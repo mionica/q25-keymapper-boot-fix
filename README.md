@@ -67,10 +67,23 @@ adding it to a ROM image:
 .\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk
 ```
 
+On Linux/macOS:
+
+```bash
+chmod +x ./scripts/install-system-test.sh
+./scripts/install-system-test.sh --apk ./q25-keymapper-boot-fix-system-1.0.6.apk
+```
+
 If Android reports a signature mismatch from an older local install, rerun with:
 
 ```powershell
 .\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk -CleanInstall
+```
+
+Or on Linux/macOS:
+
+```bash
+./scripts/install-system-test.sh --apk ./q25-keymapper-boot-fix-system-1.0.6.apk --clean-install
 ```
 
 The script installs the APK, grants `WRITE_SECURE_SETTINGS`, launches the hidden
