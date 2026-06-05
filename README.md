@@ -1,0 +1,55 @@
+# Q25 KeyMapper Boot Fix
+
+Q25 KeyMapper Boot Fix is a tiny Android helper for the Zinwa Q25 / BenOS boot keyboard issue where KeyMapper Accessibility starts before the first user unlock and touches credential-encrypted storage.
+
+The app disables KeyMapper Accessibility during Direct Boot, then restores it after the first unlock.
+
+## What It Does
+
+- On `LOCKED_BOOT_COMPLETED` or locked `BOOT_COMPLETED`, remove KeyMapper from `enabled_accessibility_services`.
+- Store the previous accessibility service list in device-protected storage.
+- On `USER_UNLOCKED`, restore the previous list.
+- After first unlock, KeyMapper remains available on the lockscreen and when the screen is off.
+
+## One-Time Setup
+
+Install the APK, open it once, then grant secure settings permission:
+
+```bash
+adb shell pm grant com.q25.keymapperbootfix android.permission.WRITE_SECURE_SETTINGS
+```
+
+Opening the app once is important because Android suppresses boot receivers for newly installed apps until they have been launched.
+
+## Device Test
+
+Verified on a connected Q25:
+
+- Before unlock after reboot: user state `RUNNING_LOCKED`; KeyMapper removed from enabled accessibility services.
+- After first unlock: user state `RUNNING_UNLOCKED`; KeyMapper restored automatically.
+
+## Build
+
+```bash
+./gradlew assembleDebug
+./gradlew assembleRelease
+```
+
+Release signing is read from environment variables:
+
+```bash
+Q25_BOOT_FIX_KEYSTORE=/path/to/release.jks
+Q25_BOOT_FIX_KEYSTORE_PASSWORD=...
+Q25_BOOT_FIX_KEY_ALIAS=q25-keymapper-boot-fix
+Q25_BOOT_FIX_KEY_PASSWORD=...
+```
+
+## Targeted KeyMapper Service
+
+```text
+io.github.sds100.keymapper/io.github.sds100.keymapper.system.accessibility.MyAccessibilityService
+```
+
+## License
+
+MIT

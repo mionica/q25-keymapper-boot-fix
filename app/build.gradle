@@ -1,0 +1,37 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.q25.keymapperbootfix"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.q25.keymapperbootfix"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("Q25_BOOT_FIX_KEYSTORE")
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("Q25_BOOT_FIX_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("Q25_BOOT_FIX_KEY_ALIAS")
+                keyPassword System.getenv("Q25_BOOT_FIX_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (System.getenv("Q25_BOOT_FIX_KEYSTORE")) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled false
+        }
+    }
+}
