@@ -58,6 +58,41 @@ For ROM inclusion, install the system APK as a priv-app and allowlist:
 </privapp-permissions>
 ```
 
+### System APK Test Install
+
+ROM testers can smoke-test the no-launcher system APK as a normal user app before
+adding it to a ROM image:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk
+```
+
+On Linux/macOS:
+
+```bash
+chmod +x ./scripts/install-system-test.sh
+./scripts/install-system-test.sh --apk ./q25-keymapper-boot-fix-system-1.0.6.apk
+```
+
+If Android reports a signature mismatch from an older local install, rerun with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk -CleanInstall
+```
+
+Or on Linux/macOS:
+
+```bash
+./scripts/install-system-test.sh --apk ./q25-keymapper-boot-fix-system-1.0.6.apk --clean-install
+```
+
+The script installs the APK, grants `WRITE_SECURE_SETTINGS`, launches the hidden
+activity once so Android will deliver boot broadcasts, and prints package state.
+
+This is not the same as final ROM integration. For BenOS or another ROM, the APK
+should still be installed under `/system/priv-app` with the priv-app permission
+allowlist above.
+
 Release signing is read from environment variables:
 
 ```bash
