@@ -58,7 +58,7 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         refresh();
-        if (!checkedForUpdates) {
+        if (BuildConfig.UPDATE_CHECK_ENABLED && !checkedForUpdates) {
             checkedForUpdates = true;
             UpdateChecker.checkForUpdates(this, this::showUpdateDialog);
         }

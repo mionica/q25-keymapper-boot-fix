@@ -31,12 +31,32 @@ Verified on a connected Q25:
 ## Build
 
 ```bash
-./gradlew assembleDebug
-./gradlew assembleRelease
+./gradlew assembleStandardDebug
+./gradlew assembleSystemDebug
+./gradlew assembleStandardRelease
+./gradlew assembleSystemRelease
 ```
 
-The app checks GitHub Releases when opened. If a newer SemVer release exists,
-it shows a dialog that opens the latest release page.
+The standard APK checks GitHub Releases when opened. If a newer SemVer release
+exists, it shows a dialog that opens the latest release page.
+
+The system APK is intended for ROM inclusion. It has no launcher entry and does
+not check GitHub for updates.
+
+## Release Variants
+
+GitHub releases publish two APKs:
+
+- `q25-keymapper-boot-fix-standard-<version>.apk`: sideload build with launcher UI and update checker.
+- `q25-keymapper-boot-fix-system-<version>.apk`: no-launcher build for `/system/priv-app`.
+
+For ROM inclusion, install the system APK as a priv-app and allowlist:
+
+```xml
+<privapp-permissions package="com.q25.keymapperbootfix">
+    <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+</privapp-permissions>
+```
 
 Release signing is read from environment variables:
 

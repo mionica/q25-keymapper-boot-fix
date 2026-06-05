@@ -11,11 +11,24 @@ android {
         minSdk 24
         targetSdk 35
         versionCode Integer.parseInt(System.getenv("VERSION_CODE") ?: "1")
-        versionName System.getenv("VERSION_NAME") ?: "1.0.4"
+        versionName System.getenv("VERSION_NAME") ?: "1.0.5"
     }
 
     buildFeatures {
         buildConfig true
+    }
+
+    flavorDimensions "distribution"
+
+    productFlavors {
+        standard {
+            dimension "distribution"
+            buildConfigField "boolean", "UPDATE_CHECK_ENABLED", "true"
+        }
+        system {
+            dimension "distribution"
+            buildConfigField "boolean", "UPDATE_CHECK_ENABLED", "false"
+        }
     }
 
     signingConfigs {
