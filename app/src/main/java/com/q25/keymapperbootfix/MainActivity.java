@@ -83,7 +83,7 @@ public final class MainActivity extends Activity {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(release.releaseUrl));
                     startActivity(intent);
                 })
-                .setNegativeButton("Later", (dialog, which) ->
+                .setNegativeButton("Skip this update", (dialog, which) ->
                         UpdateChecker.dismissRelease(this, release.versionName))
                 .show();
     }
