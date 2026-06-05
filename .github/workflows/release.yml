@@ -51,34 +51,45 @@ jobs:
           fi
           echo "$KEYSTORE_BASE64" | base64 --decode > release.jks
 
-      - name: Build signed release APK
+      - name: Build signed release APKs
         env:
           VERSION_CODE: ${{ github.run_number }}
           Q25_BOOT_FIX_KEYSTORE: ${{ github.workspace }}/release.jks
           Q25_BOOT_FIX_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           Q25_BOOT_FIX_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           Q25_BOOT_FIX_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleStandardRelease assembleSystemRelease
 
       - name: Prepare artifact names
         run: |
           VERSION_NAME="$(python3 scripts/read_version.py app/build.gradle)"
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk "release/q25-keymapper-boot-fix-${VERSION_NAME}.apk"
+          cp app/build/outputs/apk/standard/release/app-standard-release.apk "release/q25-keymapper-boot-fix-standard-${VERSION_NAME}.apk"
+          cp app/build/outputs/apk/system/release/app-system-release.apk "release/q25-keymapper-boot-fix-system-${VERSION_NAME}.apk"
           echo "TAG_NAME=v${VERSION_NAME}" >> "$GITHUB_ENV"
-          echo "APK_PATH=release/q25-keymapper-boot-fix-${VERSION_NAME}.apk" >> "$GITHUB_ENV"
+          echo "STANDARD_APK_PATH=release/q25-keymapper-boot-fix-standard-${VERSION_NAME}.apk" >> "$GITHUB_ENV"
+          echo "SYSTEM_APK_PATH=release/q25-keymapper-boot-fix-system-${VERSION_NAME}.apk" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
           name: ${{ env.TAG_NAME }}
-          files: ${{ env.APK_PATH }}
+          files: |
+            ${{ env.STANDARD_APK_PATH }}
+            ${{ env.SYSTEM_APK_PATH }}
           body: |
             Automated release from `${{ github.sha }}`.
 
-            Install the APK, open it once, then grant:
+            Assets:
+
+            - `q25-keymapper-boot-fix-standard`: sideload build with launcher UI and update checker.
+            - `q25-keymapper-boot-fix-system`: no-launcher build for ROM `/system/priv-app` inclusion.
+
+            For the standard APK, install it, open it once, then grant:
 
             ```bash
             adb shell pm grant com.q25.keymapperbootfix android.permission.WRITE_SECURE_SETTINGS
             ```
+
+            For the system APK, include a priv-app permissions allowlist granting `android.permission.WRITE_SECURE_SETTINGS`.
