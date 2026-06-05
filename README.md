@@ -65,6 +65,12 @@ Merges to `main` run `.github/workflows/release.yml`, which builds a signed rele
 io.github.sds100.keymapper/io.github.sds100.keymapper.system.accessibility.MyAccessibilityService
 ```
 
+## Support
+
+If this fix helps you, you can support ongoing device debugging and maintenance on Ko-fi:
+
+[ko-fi.com/smh786](https://ko-fi.com/smh786)
+
 ## License
 
 MIT
