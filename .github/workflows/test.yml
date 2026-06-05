@@ -23,9 +23,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
+
+      - name: Check version bump
+        if: github.event_name == 'pull_request'
+        run: |
+          git show origin/main:app/build.gradle > /tmp/base-build.gradle
+          python3 scripts/check_version_bump.py /tmp/base-build.gradle app/build.gradle
 
       - name: Set up JDK
         uses: actions/setup-java@v4

@@ -48,6 +48,7 @@ Q25_BOOT_FIX_KEY_PASSWORD=...
 
 Pull requests run `.github/workflows/test.yml`:
 
+- SemVer `versionName` bump check against `main`
 - `testDebugUnitTest`
 - `lintDebug`
 - `assembleDebug`
@@ -58,6 +59,8 @@ Merges to `main` run `.github/workflows/release.yml`, which builds a signed rele
 - `KEYSTORE_PASSWORD`
 - `KEY_ALIAS`
 - `KEY_PASSWORD`
+
+Release tags use the checked-in SemVer `versionName`, for example `v1.0.3`.
 
 ## Targeted KeyMapper Service
 

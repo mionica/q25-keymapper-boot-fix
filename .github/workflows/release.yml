@@ -54,7 +54,6 @@ jobs:
       - name: Build signed release APK
         env:
           VERSION_CODE: ${{ github.run_number }}
-          VERSION_NAME: 1.0.${{ github.run_number }}
           Q25_BOOT_FIX_KEYSTORE: ${{ github.workspace }}/release.jks
           Q25_BOOT_FIX_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           Q25_BOOT_FIX_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -63,10 +62,11 @@ jobs:
 
       - name: Prepare artifact names
         run: |
+          VERSION_NAME="$(python3 scripts/read_version.py app/build.gradle)"
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk "release/q25-keymapper-boot-fix-${GITHUB_RUN_NUMBER}.apk"
-          echo "TAG_NAME=v1.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
-          echo "APK_PATH=release/q25-keymapper-boot-fix-${GITHUB_RUN_NUMBER}.apk" >> "$GITHUB_ENV"
+          cp app/build/outputs/apk/release/app-release.apk "release/q25-keymapper-boot-fix-${VERSION_NAME}.apk"
+          echo "TAG_NAME=v${VERSION_NAME}" >> "$GITHUB_ENV"
+          echo "APK_PATH=release/q25-keymapper-boot-fix-${VERSION_NAME}.apk" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
