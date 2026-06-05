@@ -5,4 +5,19 @@
     <uses-permission
         android:name="android.permission.INTERNET"
         tools:node="remove" />
+    <application>
+        <!-- Accessibility service for entering the PIN on the lockscreen -->
+        <service
+            android:name=".LockscreenPinEntry"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
+	        android:label="@string/accessibility_service_description">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+    </application>
 </manifest>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Q25 KeyMapper Boot Fix</string>
+    <string name="app_name">Q25 PIN/Password Input Fix</string>
+    <string name="accessibility_service_description">Lockscreen PIN support</string>
 </resources>
