@@ -64,7 +64,7 @@ ROM testers can smoke-test the no-launcher system APK as a normal user app befor
 adding it to a ROM image:
 
 ```powershell
-.\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk
 ```
 
 On Linux/macOS:
@@ -77,7 +77,7 @@ chmod +x ./scripts/install-system-test.sh
 If Android reports a signature mismatch from an older local install, rerun with:
 
 ```powershell
-.\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk -CleanInstall
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-system-test.ps1 -ApkPath .\q25-keymapper-boot-fix-system-1.0.6.apk -CleanInstall
 ```
 
 Or on Linux/macOS:
