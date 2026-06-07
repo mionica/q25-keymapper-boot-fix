@@ -25,7 +25,7 @@ function Resolve-ApkPath {
 }
 
 $apk = Resolve-ApkPath $ApkPath
-$packageName = "com.q25.keymapperbootfix"
+$packageName = "ro.q25.pinentry"
 $activity = "$packageName/.MainActivity"
 
 Write-Host "Using APK: $apk"

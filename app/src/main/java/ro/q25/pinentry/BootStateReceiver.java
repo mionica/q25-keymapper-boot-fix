@@ -1,4 +1,4 @@
-package com.q25.keymapperbootfix;
+package ro.q25.pinentry;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

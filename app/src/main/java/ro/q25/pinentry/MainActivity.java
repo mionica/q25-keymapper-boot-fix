@@ -1,9 +1,6 @@
-package com.q25.keymapperbootfix;
+package ro.q25.pinentry;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -23,12 +20,20 @@ public final class MainActivity extends Activity {
         layout.setPadding(padding, padding, padding, padding);
 
         TextView title = new TextView(this);
-        title.setText("Q25 KeyMapper Boot Fix");
+        title.setText("Q25 KeyMapper Boot Fix / PIN entry helper");
         title.setTextSize(22);
         layout.addView(title);
 
         TextView body = new TextView(this);
-        body.setText("Keeps KeyMapper Accessibility disabled only before the first unlock after boot, then restores it automatically.");
+        body.setText("Keeps KeyMapper Accessibility disabled only before the first unlock after boot, then restores it automatically. " +
+                     "This enables typing a password at boot, without KeyMapper constantly crashing in the background.\n" +
+                     "\n" +
+                     "Additionaly, an accesibility service is provided that enables typing the PIN on the lockscreen using the keyboard, " +
+                     "*after* the phone is first unlocked\n" +
+					 "It also supports pin entry on they keyboard in two Romanian banking apps\n" +
+                     "\n" +
+					 "This work is derived from the excellent com.q25.keymapperbootfix by smh786\n"
+					 );
         body.setTextSize(16);
         body.setPadding(0, dp(12), 0, dp(12));
         layout.addView(body);
@@ -46,7 +51,7 @@ public final class MainActivity extends Activity {
         layout.addView(apply);
 
         TextView setup = new TextView(this);
-        setup.setText("One-time setup:\nadb shell pm grant com.q25.keymapperbootfix android.permission.WRITE_SECURE_SETTINGS");
+        setup.setText("One-time setup:\nadb shell pm grant ro.q25.pinentry android.permission.WRITE_SECURE_SETTINGS");
         setup.setTextSize(14);
         setup.setPadding(0, dp(16), 0, 0);
         layout.addView(setup);
@@ -58,10 +63,11 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         refresh();
-        if (BuildConfig.UPDATE_CHECK_ENABLED && !checkedForUpdates) {
-            checkedForUpdates = true;
-            UpdateChecker.checkForUpdates(this, this::showUpdateDialog);
-        }
+		// disable self-updating - this is mostly for personal consumption
+        //if (BuildConfig.UPDATE_CHECK_ENABLED && !checkedForUpdates) {
+        //    checkedForUpdates = true;
+        //    UpdateChecker.checkForUpdates(this, this::showUpdateDialog);
+        //}
     }
 
     private void refresh() {
@@ -72,19 +78,4 @@ public final class MainActivity extends Activity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
-    private void showUpdateDialog(UpdateChecker.ReleaseInfo release) {
-        if (isFinishing() || isDestroyed()) return;
-
-        new AlertDialog.Builder(this)
-                .setTitle("Update available")
-                .setMessage("Version " + release.versionName + " is available.\n\nYou are running "
-                        + BuildConfig.VERSION_NAME + ".")
-                .setPositiveButton("Open release", (dialog, which) -> {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(release.releaseUrl));
-                    startActivity(intent);
-                })
-                .setNegativeButton("Skip this update", (dialog, which) ->
-                        UpdateChecker.dismissRelease(this, release.versionName))
-                .show();
-    }
 }

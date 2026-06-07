@@ -1,3 +1,19 @@
+# Q25 KeyMapper Boot Fix / PIN Entry helper
+
+This is a modded version of smh786's com.q25.keymapperbootfix that supports PIN
+entry on the Q25 lockscreen via the keyboard after the first unlock; it additionally
+supports PIN input in two Romanian banking apps.
+
+Because of the sensitivity of having an accessibility service interacting with banking
+apps, it is expected that this fork will be mostly for personal consumption.
+
+For installation, use
+```bash
+adb shell pm grant ro.q25.pinentry android.permission.WRITE_SECURE_SETTINGS
+```
+
+The following is the original readme:
+
 # Q25 KeyMapper Boot Fix
 
 Q25 KeyMapper Boot Fix is a tiny Android helper for the Zinwa Q25 / BenOS boot keyboard issue where KeyMapper Accessibility starts before the first user unlock and touches credential-encrypted storage.
@@ -53,8 +69,9 @@ GitHub releases publish two APKs:
 For ROM inclusion, install the system APK as a priv-app and allowlist:
 
 ```xml
+
 <privapp-permissions package="com.q25.keymapperbootfix">
-    <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+    <permission name="android.permission.WRITE_SECURE_SETTINGS" />
 </privapp-permissions>
 ```
 

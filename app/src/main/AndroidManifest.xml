@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
@@ -33,7 +32,7 @@
 
         <!-- Accessibility service for entering the PIN on the lockscreen -->
         <service
-            android:name=".LockscreenPinEntry"
+            android:name=".KeyboardPinEntry"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="true"
 	        android:label="@string/accessibility_service_description">

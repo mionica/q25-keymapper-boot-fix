@@ -2,13 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission
-        android:name="android.permission.INTERNET"
-        tools:node="remove" />
     <application>
         <!-- Accessibility service for entering the PIN on the lockscreen -->
         <service
-            android:name=".LockscreenPinEntry"
+            android:name=".KeyboardPinEntry"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="true"
 	        android:label="@string/accessibility_service_description">

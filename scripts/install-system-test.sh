@@ -4,7 +4,7 @@ set -eu
 ADB="${ADB:-adb}"
 APK_PATH=""
 CLEAN_INSTALL=0
-PACKAGE_NAME="com.q25.keymapperbootfix"
+PACKAGE_NAME="ro.q25.pinentry"
 ACTIVITY="$PACKAGE_NAME/.MainActivity"
 
 while [ "$#" -gt 0 ]; do

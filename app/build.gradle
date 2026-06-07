@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace "com.q25.keymapperbootfix"
+    namespace "ro.q25.pinentry"
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.q25.keymapperbootfix"
+        applicationId "ro.q25.pinentry"
         minSdk 24
         targetSdk 35
         versionCode Integer.parseInt(System.getenv("VERSION_CODE") ?: "1")
