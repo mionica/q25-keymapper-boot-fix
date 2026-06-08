@@ -54,6 +54,13 @@ public class KeyboardPinEntry extends AccessibilityService {
     private static final String pinContainerQ25Lockscreen = "com.android.systemui:id/keyguard_pin_view";
     private static final String pinContainerCecApp = "hr.asseco.android.jimba.cecro:id/keypad";
     private static final String pinContainerCecTokenApp = "ro.cec.android.mtoken:id/virtual_keypad_background";
+
+    // Wise is a bit different - the backspace is outside the keypad object, so use a container of
+    // both it and the keypad
+    //private static final String pinContainerWiseApp = "com.transferwise.android:id/keypad";
+    private static final String pinContainerWiseApp = "com.transferwise.android:id/container";
+
+    // Revolut and BT Pay seem to disable accessibility access
 //  private static final String pinContainerRevolutApp = "com.revolut.revolut:id/PinCodeView_keypad";
 //  private static final String pinContainerBTPayApp = "ro.btrl.pay:id/action_bar_root";
 
@@ -318,6 +325,27 @@ public class KeyboardPinEntry extends AccessibilityService {
                 result = clickButtonInContainer(pinContainer, "ro.cec.android.mtoken:id/PinOk", null, "ENTER");
             if (key != null)
                 result = clickButtonInContainer(pinContainer, "ro.cec.android.mtoken:id/Pin" + key, null, key);
+            pinContainer.recycle();
+            return result;
+        }
+        pinContainer = getContainer(pinContainerWiseApp);
+        if (pinContainer != null) {
+            // Wise PIN entry screen has
+            // <node text="[0..9]" resource-id="com.transferwise.android:id/button[0..9]" content-desc=""
+            //   class="android.widget.Button" package="com.transferwise.android"
+            //   enabled="true" clickable="true" focusable="true"
+            //   checkable="false" scrollable="false" long-clickable="false" password="false"
+            //   ...>
+            // enter/backspace have the resource-id's
+            //   "com.transferwise.android:id/button_accept" / "com.transferwise.android:id/button_backspace"
+
+            boolean result = false;
+            if (key == "\b")
+                result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button_backspace", null, "DEL");
+            if (key == "\n")
+                result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button_accept", null, "ENTER");
+            if (key != null)
+                result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button" + key, null, key);
             pinContainer.recycle();
             return result;
         }
