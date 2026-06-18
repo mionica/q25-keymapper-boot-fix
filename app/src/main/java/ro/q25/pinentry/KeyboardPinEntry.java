@@ -338,7 +338,6 @@ public class KeyboardPinEntry extends AccessibilityService {
             //   ...>
             // enter/backspace have the resource-id's
             //   "com.transferwise.android:id/button_accept" / "com.transferwise.android:id/button_backspace"
-
             boolean result = false;
             if (key == "\b")
                 result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button_backspace", null, "DEL");
