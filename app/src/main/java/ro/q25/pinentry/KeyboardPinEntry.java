@@ -79,7 +79,7 @@ public class KeyboardPinEntry extends AccessibilityService {
         return result;
     }
 
-    private boolean clickButtonInContainer(AccessibilityNodeInfo container, String viewId, String text, String keyName, boolean clickAfter, boolean clickBefore) {
+    private boolean clickButtonInContainer(AccessibilityNodeInfo container, String viewId, String text, String keyName, int clickDelta) {
         if (container == null)
             return false;
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
@@ -101,54 +101,51 @@ public class KeyboardPinEntry extends AccessibilityService {
             rootNode.recycle();
             return false;
         }
+        boolean result = false;
         // make sure the target node is a child of pinViewNode
         for (int i = 0; i < container.getChildCount(); ++i) {
             AccessibilityNodeInfo crtNode = container.getChild(i);
             if (targetNode.equals(crtNode)) {
                 // this is the normal case
-                if (! clickAfter && ! clickBefore) {
-                    var result = false;
+                if (clickDelta == 0) {
                     if (targetNode.isClickable()) {
-                        targetNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                        result = targetNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                         // just kidding - you don't want your PIN in logcat...
                         //Log.d(TAG, "Clicked "+keyName);
-                        result = true;
                     } else
                         Log.w(TAG, "Not clickable: " + viewId);
                     crtNode.recycle();
-                    targetNode.recycle();
-                    rootNode.recycle();
-                    return result;
+                    break;
                 }
-                // for CEC and BTPay, you get to backspace as the first clickable thing after 0
-                else if (clickAfter) {
+                // for CEC, you get to backspace as the first clickable thing after 0
+                else if (clickDelta > 0) {
                     crtNode.recycle();
                     for (int j = i + 1; j < container.getChildCount(); ++j) {
                         crtNode = container.getChild(j);
                         if (crtNode.isClickable()) {
-                            crtNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                            //Log.d(TAG, "Clicked "+keyName);
-                            crtNode.recycle();
-                            targetNode.recycle();
-                            rootNode.recycle();
-                            return true;
+                            --clickDelta;
+                            if (clickDelta == 0) {
+                                result = crtNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                                crtNode.recycle();
+                                break;
+                            }
                         }
                         crtNode.recycle();
                     }
                     break;
                 }
                 // for BTPay, you get to any digit via the last clickable thing before it (!)
-                else { // if (clickBefore)
+                else { // if (clickBefore < 0)
                     crtNode.recycle();
                     for (int j = i - 1; j >= 0; --j) {
                         crtNode = container.getChild(j);
                         if (crtNode.isClickable()) {
-                            crtNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                            //Log.d(TAG, "Clicked to the left of " + keyName);
-                            crtNode.recycle();
-                            targetNode.recycle();
-                            rootNode.recycle();
-                            return true;
+                            ++clickDelta;
+                            if (clickDelta == 0) {
+                                result = crtNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                                crtNode.recycle();
+                                break;
+                            }
                         }
                         crtNode.recycle();
                     }
@@ -158,61 +155,15 @@ public class KeyboardPinEntry extends AccessibilityService {
             crtNode.recycle();
         }
         targetNode.recycle();
+        rootNode.recycle();
         // if we get here, the node doesn't exist in the PIN container
-        Log.w(TAG, ((viewId != null) ? viewId : keyName) + " not found");
-        return false;
+        if (! result)
+            Log.w(TAG, ((viewId != null) ? viewId : keyName) + " not found");
+        return result;
     }
 
-    /*
-    // attempt to get BTPay working - no joy
-    private boolean clickButtonInContainerByText(AccessibilityNodeInfo container, String text, String keyName, boolean clickAfter) {
-        if (container == null || text == null)
-            return false;
-        AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-        if (rootNode == null)
-            return false;
-        if(text != null && keyName == null)
-            keyName = text;
-        // keep track of the most recently encountered clickable node; when we get a text match,
-        // we'll usually click that, unless clickAfter is set
-        AccessibilityNodeInfo lastClickableNode = null;
-        boolean clickNext = false;
-        for (int i = 0; i < rootNode.getChildCount(); ++i) {
-            AccessibilityNodeInfo crtNode = rootNode.getChild(i);
-            if (crtNode.isClickable()) {
-                lastClickableNode = crtNode;
-                if (clickNext) {
-                    crtNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    lastClickableNode.recycle();
-                    crtNode.recycle();
-                    rootNode.recycle();
-                    return true;
-                }
-            }
-            if (crtNode.getText() == text) {
-                // if we're in clickAfter node, click the next clickable node we encounter
-                // also do this if we haven't found any clickable node yet
-                if (clickAfter || (lastClickableNode == null)) {
-                    clickNext = true;
-                    crtNode.recycle();
-                    continue;
-                }
-                // if not, click the most recently encountered clickable node (potentially this one)
-                lastClickableNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                lastClickableNode.recycle();
-                crtNode.recycle();
-                rootNode.recycle();
-                return true;
-            }
-            crtNode.recycle();
-        }
-        // if we get here, the node doesn't exist in the PIN container
-        Log.w(TAG, keyName + "(\"" +text+"\","+clickAfter+") not found");
-        return false;
-    }
-    */
     private boolean clickButtonInContainer(AccessibilityNodeInfo container, String viewId, String text, String keyName) {
-        return clickButtonInContainer(container, viewId, text, keyName, false, false);
+        return clickButtonInContainer(container, viewId, text, keyName, 0);
     }
 
     private String getCharFromKeyCode(int keyCode) {
@@ -300,10 +251,14 @@ public class KeyboardPinEntry extends AccessibilityService {
             //   ...>
             // backspace's a bitch - no text, no resId, class "android.widget.ImageButton"
             //   have to detect is as the next clickable node after 0
+            // ENTER's an interesting case: on the app login screen, it doesn't exist, but on the
+            //   screen for inputting a PIN for confirmation, it does (identified by text="OK")
             boolean result = false;
             if (key == "\b")
-                result = clickButtonInContainer(pinContainer, null, "0", "DEL", true, false);
-            if (key != null && key != "\n")
+                result = clickButtonInContainer(pinContainer, null, "0", "DEL", 1);
+            else if (key == "\n")
+                result = clickButtonInContainer(pinContainer, null, "OK", "ENTER");
+            else if (key != null)
                 result = clickButtonInContainer(pinContainer, null, key, null);
             pinContainer.recycle();
             return result;
@@ -321,9 +276,9 @@ public class KeyboardPinEntry extends AccessibilityService {
             boolean result = false;
             if (key == "\b")
                 result = clickButtonInContainer(pinContainer, "ro.cec.android.mtoken:id/PinDel", null, "DEL");
-            if (key == "\n")
+            else if (key == "\n")
                 result = clickButtonInContainer(pinContainer, "ro.cec.android.mtoken:id/PinOk", null, "ENTER");
-            if (key != null)
+            else if (key != null)
                 result = clickButtonInContainer(pinContainer, "ro.cec.android.mtoken:id/Pin" + key, null, key);
             pinContainer.recycle();
             return result;
@@ -341,9 +296,9 @@ public class KeyboardPinEntry extends AccessibilityService {
             boolean result = false;
             if (key == "\b")
                 result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button_backspace", null, "DEL");
-            if (key == "\n")
+            else if (key == "\n")
                 result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button_accept", null, "ENTER");
-            if (key != null)
+            else if (key != null)
                 result = clickButtonInContainer(pinContainer, "com.transferwise.android:id/button" + key, null, key);
             pinContainer.recycle();
             return result;
@@ -386,9 +341,9 @@ public class KeyboardPinEntry extends AccessibilityService {
             //   have to detect is as the next clickable node after 0
             boolean result = false;
             if (key == "\b")
-                result = clickButtonInContainerByText(pinContainer, "0", "DEL", true);
+                result = clickButtonInContainer(pinContainer, null, "0", "DEL", 1);
             if (key != null && key != "\n")
-                result = clickButtonInContainerByText(pinContainer, key, key, false);
+                result = clickButtonInContainer(pinContainer, null, key, key, -1);
             pinContainer.recycle();
             return result;
         }
